@@ -1,0 +1,11 @@
+{
+  "name": "nlp-based-automated-cleansing-system-main",
+  "version": "1.0.0",
+  "description": "Tis is the NLP based automated cleansing foir healthcare data package.json files",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "unknown",
+  "license": "ISC"
+}

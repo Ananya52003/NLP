@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Healthcare Data Cleansing Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    body {
+      background-color: #f4f7fc;
+      font-family: 'Arial', sans-serif;
+    }
+
+    .card {
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+    }
+
+    .card-body {
+      background-color: #ffffff;
+    }
+
+    .metric-card {
+      padding: 30px;
+      background-color: #ffffff;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .metric-score {
+      font-size: 45px;
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .metric-circle {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background-color: #f7f7f7;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 36px;
+      margin-bottom: 40px;
+    }
+
+    table {
+      margin-top: 20px;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f7f7f7;
+    }
+
+    tr:hover {
+      background-color: #e2e6ea;
+    }
+
+    .alert {
+      margin-top: 20px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center">Healthcare Data Cleansing Dashboard</h1>
+    <div class="row mt-4">
+      <!-- Metric Score Section -->
+      <div class="col-md-6">
+        <div class="card metric-card">
+          <div class="card-header">Overall Data Quality Metric</div>
+          <div class="card-body text-center">
+            <div class="metric-circle">
+              <h3 class="metric-score" id="metric-score">Loading...</h3>
+            </div>
+            <p>This score indicates the overall quality of current healthcare data.</p>
+          </div>
+        </div>
+      </div>
+      <!-- Data Quality Analysis Graph -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">Test Result Predict Analysis</div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="testResultChart" width="400" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-4">
+      <!-- Live Data Table -->
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">Live Healthcare Data</div>
+          <div class="card-body">
+            <table class="table table-striped" id="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Age</th>
+                  <th>Gender</th>
+                  <th>Blood Type</th>
+                  <th>Test Result</th>
+                </tr>
+              </thead>
+              <tbody id="data-tbody">
+                <!-- Data rows will be populated here dynamically -->
+              </tbody>
+            </table>
+            <div class="alert alert-warning" id="alert-message" style="display:none;">
+              Error loading data. Please try again.
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  <script>
+    // Fetch data from the API (Local Server)
+    axios.get('http://127.0.0.1:3000/api/metrics')
+      .then(response => {
+        // Update metrics section
+        const metrics = response.data;
+        document.getElementById('metric-score').innerText = metrics.qualityMetric;
+
+        // Populate the healthcare data table
+        const tableBody = document.getElementById('data-tbody');
+        metrics.data.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${row.name}</td>
+            <td>${row.age}</td>
+            <td>${row.gender}</td>
+            <td>${row.blood_type}</td>
+            <td>${row.test_results}</td>
+          `;
+          tableBody.appendChild(tr);
+        });
+
+        // Populate the chart with test result predictions
+        const predictions = metrics.predictions;
+        const labels = ['Normal', 'Inconclusive', 'Abnormal'];
+        const chartData = {
+          labels: labels,
+          datasets: [{
+            label: 'Test Result Predictions',
+            data: predictions,
+            backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+            borderWidth: 1
+          }]
+        };
+        const chartConfig = {
+          type: 'pie',
+          data: chartData,
+        };
+        new Chart(document.getElementById('testResultChart'), chartConfig);
+      })
+      .catch(error => {
+        console.error('Error fetching metrics:', error);
+        // Display alert message
+        document.getElementById('alert-message').style.display = 'block';
+      });
+  </script>
+</body>
+</html>
